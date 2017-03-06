@@ -251,7 +251,7 @@ you find any mistakes or typos.
     end
     ```
 
-  - Perform validation early and return as early as possible.
+  - Perform validation early.
 
     ```lua
     -- bad
@@ -266,13 +266,44 @@ you find any mistakes or typos.
 
     -- good
     local function isGoodName(name, options, args)
-      if #name < 3 or #name > 30 then return false end
+      if name and #name < 3 or #name > 30 then
+
+        -- ...stuff...
+
+        return good()
+      else
+        return fallback()
+      end
+    end
+    ```
+
+  - Avoid early return where possible. The cyclomatic complexity of the function
+    is only hidden but not resolved when doing early returns. One should instead
+    work on the complexity of the function.
+    For each conditional branch the number of tests required increases.
+
+  ```lua
+    -- bad
+    local function early(x, code)
+      if code == 300 then
+        return
+      end
 
       -- ...stuff...
 
-      return true
     end
-    ```
+
+    -- good
+    local function proper(x, code)
+      if code == 300 then
+        return
+      else
+        -- ...stuff...
+
+        return
+      end
+    end
+  ```
 
   - All functions should have comments including a description and defining parameters and return values. Parameters should have descriptive names whereever possible.
 
@@ -458,19 +489,17 @@ you find any mistakes or typos.
     end
     ```
 
-  - Prefer defaults to `else` statements where it makes sense. This results in
-    less complex and safer code at the expense of variable reassignment, so
-    situations may differ.
+  - Avoid variable reassignment to reduce conditional complexity. It's easier
+    to reason about the code when as much as possible is immutable. This is
+    related to early returns.
 
     ```lua
     --bad
     local function full_name(first, last)
-      local name
+      local name = 'John Smith'
 
       if first and last then
         name = first .. ' ' .. last
-      else
-        name = 'John Smith'
       end
 
       return name
@@ -478,10 +507,12 @@ you find any mistakes or typos.
 
     --good
     local function full_name(first, last)
-      local name = 'John Smith'
+      local name
 
       if first and last then
         name = first .. ' ' .. last
+      else
+        name = 'John Smith'
       end
 
       return name
