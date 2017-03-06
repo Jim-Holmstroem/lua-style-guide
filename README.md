@@ -166,11 +166,19 @@ you find any mistakes or typos.
     ```
 
   - Strings longer than 120 characters should be written across multiple lines 
-    using concatenation or text blocks.
+    using text blocks.
 
     ```lua
     -- bad
     local errorMessage = 'This is a super long error that was thrown because of Batman. When you stop to think about how Batman had anything to do with this, you would get nowhere fast.'
+
+    -- bad
+    local errorMessage = 'This is a super long error that ' ..
+      'was thrown because of Batman. ' ..
+      'When you stop to think about ' ..
+      'how Batman had anything to do ' ..
+      'with this, you would get nowhere ' ..
+      'fast.'
 
     -- bad
     local errorMessage = 'This is a super long error that \
@@ -180,7 +188,6 @@ you find any mistakes or typos.
     with this, you would get nowhere \
     fast.'
 
-
     -- good
     local errorMessage = [[This is a super long error that
       was thrown because of Batman.
@@ -189,13 +196,6 @@ you find any mistakes or typos.
       with this, you would get nowhere
       fast.]]
 
-    -- good
-    local errorMessage = 'This is a super long error that ' ..
-      'was thrown because of Batman. ' ..
-      'When you stop to think about ' ..
-      'how Batman had anything to do ' ..
-      'with this, you would get nowhere ' ..
-      'fast.'
     ```
 
     **[[⬆]](#TOC)**
