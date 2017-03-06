@@ -27,10 +27,8 @@ you find any mistakes or typos.
   1. [Accessors](#accessors)
   1. [Constructors](#constructors)
   1. [Modules](#modules)
-  1. [File Structure](#file-structure)
+  1. [Linting](#linting)
   1. [Testing](#testing)
-  1. [Performance](#performance)
-  1. [Resources](#resources)
   1. [In the Wild](#in-the-wild)
   1. [Contributors](#contributors)
   1. [License](#license)
@@ -50,10 +48,10 @@ you find any mistakes or typos.
 
     bar = 9
 
-    print(foo, bar) -- => 1	9
+    print(foo, bar) -- => 1 9
     ```
 
-  - **Complex**: When you access a complex type you work on a reference to its value
+  - **Complex**: When you access a complex type you work on a reference to its value.
 
     + `table`
     + `function`
@@ -68,7 +66,7 @@ you find any mistakes or typos.
 
     print(foo[0], bar[0]) -- => 9   9
     print(foo[1], bar[1]) -- => 3   3
-    print(foo[2], bar[2]) -- => 2   2		
+    print(foo[2], bar[2]) -- => 2   2   
     ```
 
     **[[⬆]](#TOC)**
@@ -107,6 +105,12 @@ you find any mistakes or typos.
     local player = {
       attack = attack
     }
+
+    -- also good
+    local player = {}
+
+    player.attack = function()
+    end
     ```
 
   - Consider `nil` properties when selecting lengths.
@@ -161,8 +165,8 @@ you find any mistakes or typos.
     local fullName = 'Bob ' .. self.lastName
     ```
 
-  - Strings longer than 80 characters should be written across multiple lines 
-    using concatenation. This allows you to indent nicely.
+  - Strings longer than 120 characters should be written across multiple lines 
+    using concatenation or text blocks.
 
     ```lua
     -- bad
@@ -177,7 +181,7 @@ you find any mistakes or typos.
     fast.'
 
 
-    -- bad
+    -- good
     local errorMessage = [[This is a super long error that
       was thrown because of Batman.
       When you stop to think about
@@ -200,8 +204,7 @@ you find any mistakes or typos.
 ## <a name='functions'>Functions</a>
   - Prefer lots of small functions to large, complex functions. [Smalls Functions Are Good For The Universe](http://kikito.github.io/blog/2012/03/16/small-functions-are-good-for-the-universe/).
 
-  - Prefer function syntax over variable syntax. This helps differentiate
-    between named and anonymous functions.
+  - Prefer function syntax over variable syntax when the function *is not* a property of a table.
 
     ```lua
     -- bad
@@ -211,6 +214,25 @@ you find any mistakes or typos.
 
     -- good
     local function yup(name, options)
+      -- ...stuff...
+    end
+    ```
+
+  - Prefer variable syntax over function syntax when the function *is* a property of a table.
+
+    ```lua
+    -- bad
+
+    local function nope(name, options)
+    end
+
+    local tbl = { nope = nope }
+
+    -- good
+
+    local tbl = {}
+
+    tbl.nope = function(name, options)
       -- ...stuff...
     end
     ```
@@ -243,12 +265,58 @@ you find any mistakes or typos.
     end
 
     -- good
-    local is_good_name = function(name, options, args)
+    local function isGoodName(name, options, args)
       if #name < 3 or #name > 30 then return false end
 
       -- ...stuff...
 
       return true
+    end
+    ```
+
+  - All functions should have comments including a description and defining parameters and return values. Parameters should have descriptive names whereever possible.
+
+    ```lua
+    -- bad
+
+    --[[
+      who cares
+    --]]
+    local function noComment(x, y, z)
+      -- ...stuff...
+      return xyz
+    end
+
+    -- good
+    --[[
+        Returns information about the Visitor's car
+
+        @param make The make of the car
+        @param model The model of the car
+        @param year The year of the car's manufacture 
+        @return determinedName best name representation of the car
+    --]]
+
+    local function carName(make, model, year)
+      -- ...stuff...
+      return determinedName
+    end
+
+    -- also good
+    --[[
+        Returns information about the Visitor's car
+
+        @param self
+        @param make The make of the car
+        @param model The model of the car
+        @param year The year of the car's manufacture 
+        @return determinedName best name representation of the car
+    --]]
+
+    local M = {}
+    M:carName = function(make, model, year)
+      -- ...stuff...
+      return determinedName
     end
     ```
 
@@ -439,11 +507,11 @@ you find any mistakes or typos.
 
 ## <a name='blocks'>Blocks</a>
 
-  - Single line blocks are okay for *small* statements. Try to keep lines to 80 characters.
-    Indent lines if they overflow past the limit.
+  - Single line blocks are never okay. Try to keep lines to 120 characters.
+    If lines overflow past the limit: indent the new line, end each line with the conditional (and/or), and place the following `then` on it's own line with indentation that matches the opening `if` or `elseif` of the block.
 
     ```lua
-    -- good
+    -- bad
     if test then return false end
 
     -- good
@@ -456,7 +524,8 @@ you find any mistakes or typos.
 
     -- good
     if test < 1 and do_complicated_function(test) == false or
-        seven == 8 and nine == 10 then
+      seven == 8 and nine == 10
+    then
 
       do_other_complicated_function() 
       return false 
@@ -468,7 +537,7 @@ you find any mistakes or typos.
 
 ## <a name='whitespace'>Whitespace</a>
 
-  - Use soft tabs set to 2 spaces. Tab characters and 4-space tabs result in public flogging.
+  - Hit the tab key. Get a tab character. Adjust your text editor to receive the display of your choosing.
 
     ```lua
     -- bad
@@ -481,9 +550,14 @@ you find any mistakes or typos.
     ∙local name
     end
 
-    -- good
+    -- bad
     function() 
     ∙∙local name
+    end
+
+    -- good
+    function() 
+    [tab]local name
     end
     ```
 
@@ -685,13 +759,20 @@ you find any mistakes or typos.
     end
     ```
 
-  - Use snake_case when naming objects, functions, and instances. Tend towards
+  - Use all capitals when naming constants
+
+    ```lua
+    --good
+    CONSTANT_ACTION = 'xyz'
+    ```  
+
+  - Use camelCase when naming objects and functions. Tend towards
     verbosity if unsure about naming.
 
     ```lua
     -- bad
     local OBJEcttsssss = {}
-    local thisIsMyObject = {}
+    local this_is_my_object = {}
     local this-is-my-object = {}
 
     local c = function()
@@ -699,22 +780,21 @@ you find any mistakes or typos.
     end
 
     -- good
-    local this_is_my_object = {}
+    local thisIsMyObject = {}
 
-    local function do_that_thing()
+    local function doThatThing()
       -- ...stuff...
     end
     ```
-
-  - Use PascalCase for factories.
+  - Use PascalCase for factories and instances of factories.
 
     ```lua
     -- bad
-    local player = require('player')
+    local visitor = require 'Visitor'
 
     -- good
-    local Player = require('player')
-    local me = Player({ name = 'Jack' })
+    local Visitor = require 'Visitor'
+    local OneVisitor = Visitor({ name = 'Jack' })
     ```
 
     **[[⬆]](#TOC)**
@@ -728,17 +808,16 @@ you find any mistakes or typos.
     end
 
     --good
-    local function is_evil(alignment)
+    local function isEvil(alignment)
       return alignment < 100
     end
     ```
 
 ## <a name='modules'>Modules</a>
 
-  - The module should return a table or function.
+  - The module should return a table or setmetatable.
   - The module should not use the global namespace for anything ever. The
     module should be a closure.
-  - The file should be named like the module.
 
     ```lua
     -- thing.lua
@@ -758,65 +837,30 @@ you find any mistakes or typos.
     and therefore should usually be factories (a function returning a new instance of a table)
     unless static (like utility libraries.)
 
+  - After being called via `require` modules should be set to a local variable before being further manipulated.
+
+  ```lua
+  --bad
+
+  local output = (require 'myModule').callFunction()
+
+  --good
+
+  local MyModule = require 'myModule'
+  local output = MyModule.callFunction()
+  ```
+
   **[[⬆]](#TOC)**
 
-## <a name='file-structrure'>File Structure</a>
+## <a name='linting'>Linting</a>
 
-  - Files should be named in all lowercase.
-  - Lua files should be in a top-level `src` folder. The main library file should 
-    be called `modulename.lua`.
-  - Rockspecs, license, readme, etc should be in the top level.
-  - Tests should be in a top-level spec folder.
-  - Executables should be in a top-level bin folder.
-  - Example:
+  - All code should pass linting by [Luacheck](https://github.com/mpeterv/luacheck) with the `--std ngx_lua` flags.
 
-    ```
-    ./my_module
-      bin/
-        script.sh
-
-      spec/
-        my_module_spec.lua
-        some_file.lua
-
-      src/
-        my_module.lua
-        some_file.lua
-
-      README.md
-      LICENSE.md
-    ```
+    **[[⬆]](#TOC)**
 
 ## <a name='testing'>Testing</a>
 
-  - Use [busted](http://olivinelabs.com/busted) and write lots of tests in a /spec 
-    folder. Separate tests by module.
-  - Use descriptive `describe` and `it` blocks so it's obvious to see what
-    precisely is failing.
-  - Test interfaces. Don't test private methods. If you need to test something
-    that is private, it probably shouldn't be private in the first place.
-  - Example:
-
-    ```
-    ./my_module
-      bin/
-        script.sh
-
-      spec/
-        my_module_spec.lua
-
-        util/
-          formatters_spec.lua
-
-      src/
-        my_module.lua
-
-        util/
-          formatters.lua
-
-      README.md
-      LICENSE.md
-    ```
+  - All code should be thoroughly tested, though a proper unit testing framework is currently undetermined.
 
     **[[⬆]](#TOC)**
 
